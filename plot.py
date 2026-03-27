@@ -16,7 +16,8 @@ def read_data(dir_path, y, smooth):
             df[y] = df[y].rolling(smooth).mean()
             dfs.append(df)
 
-    all_df = pd.concat(dfs)
+    all_df = pd.concat(dfs, ignore_index=True)   # unique global index
+    all_df["step"] = all_df.groupby("tag").cumcount()  # x per run/file
     return all_df
 
 
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     fig, ax = plt.subplots()
     df = read_data(args.path, args.y, args.smooth)
-    sns.lineplot(data=df, x=df.index,
+    sns.lineplot(data=df, x="step",
                  y=args.y, hue="tag", style="tag")
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles, labels=labels)
